@@ -8,7 +8,7 @@ public class Plant : LivingEntity{
     private Transform tile;
 
     public override string GetName(){
-        return "Plant";
+        return "plant";
     }
 
     private void Start() {

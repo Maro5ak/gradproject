@@ -19,6 +19,7 @@ public class Animal : LivingEntity{
     private float thirst = 10f, hunger = 10f;
     private bool recentlyDrank, recentlyAte;
     private float lastFood;
+    private float lastDrink;
     private int numOfTries;
     
     //Movement data
@@ -28,6 +29,7 @@ public class Animal : LivingEntity{
     float moveSpeedFactor;
     float moveArcHeight = .2f;
     Vector3 startPosition;
+    Vector3 lastWaterSensed;
 
     //math, for better performance
 
@@ -38,23 +40,25 @@ public class Animal : LivingEntity{
     System.Random prng;
     
 
-    // DEBUG
-    private bool gotPath;
-
     private void Start() {
-        gotPath = false;
         recentlyAte = false;
+        recentlyDrank = false;
         prng = new System.Random();
+        currentAction = Action.Exploring;
         ChooseNextAction();
     }
     
     protected void Update() {
-
         thirst -= Time.deltaTime * 0.5f;
         hunger -= Time.deltaTime * 0.5f;
+        //Debug.Log("Thirst: " + thirst);
 
+        //cooldown so the entity isn't eating or drinking all the time
         if(Time.time - lastFood > 10f){
             recentlyAte = false;
+        }
+        if(Time.time - lastDrink > 10f){
+            recentlyDrank = false;
         }
 
         if(moving){
@@ -62,7 +66,8 @@ public class Animal : LivingEntity{
         }
         else{
             HandleInteraction();    
-            if(Time.time - lastAction > betweenActionCooldown && (currentAction != Action.Eating || currentAction != Action.Drinking)){
+            float timeSinceLastAction = Time.time - lastAction;
+            if(timeSinceLastAction > betweenActionCooldown && (currentAction != Action.Eating && currentAction != Action.Drinking)){
                 ChooseNextAction();
             }
         }
@@ -72,18 +77,19 @@ public class Animal : LivingEntity{
     protected void ChooseNextAction(){
         lastAction = Time.time;
 
-        /*if(thirst < 3 && !recentlyDrank && (currentAction != Action.Drinking || currentAction != Action.LookingForFood)){
-            //LookForWater();
-        }*/
-        if(hunger < 3f && !recentlyAte && (currentAction != Action.Eating || currentAction != Action.LookingForWater)){
+        if(thirst < 3 && !recentlyDrank && (currentAction != Action.Drinking && currentAction != Action.LookingForFood)){
+            numOfTries = 0;
+            LookForWater();
+        }
+        else if(hunger < 3f && !recentlyAte && (currentAction != Action.Eating && currentAction != Action.LookingForWater)){
             numOfTries = 0;
             
             LookForFood();
         }
 
-        else if(currentAction != Action.Eating){
+        /*else if(currentAction != Action.Eating || currentAction != Action.Drinking){
             currentAction = Action.Exploring;
-        }
+        }*/
         DoAction();
         
     }
@@ -103,8 +109,30 @@ public class Animal : LivingEntity{
         }
     }
     // Looking for water method, finds nearest water source and moves towards the water source
+    // remembers the last water source and if new water source is more further away then moves to the last one it remembered
     protected void LookForWater(){
-        
+        target = GetTarget();
+        Collider[] cols = Physics.OverlapSphere(target, 0.7f, groundMask);
+        if(numOfTries == maxTries){
+            ChoosePath();
+        }
+        else if(cols.Length != 0){
+            if(cols[0].GetComponent<Environment>().waterTile){
+                // if the last water source is further away than a new one, update to the closest one
+                lastWaterSensed = Vector3.Distance(target, this.transform.position) < Vector3.Distance(target, lastWaterSensed) ? target : lastWaterSensed;
+                target += (startPosition - target).normalized * distance;
+                target.y = this.transform.position.y;
+                currentAction = Action.LookingForWater;
+                StartMove();
+            }
+            else {
+                numOfTries++;
+                LookForWater();
+            }
+        }
+        else{
+            LookForWater();
+        }
     }
     // Looking for food method, creature tries to find a food target and moves over to the tile
     protected void LookForFood(){
@@ -115,11 +143,11 @@ public class Animal : LivingEntity{
             ChoosePath();
         }
         else if(cols.Length != 0) {
-            food = cols[0].GetComponent<Environment>().GetEntity("Plant");
+            food = cols[0].GetComponent<Environment>().GetEntity("plant");
             if(food != null){
                 target = food.transform.position;
                 target += (startPosition - target).normalized * distance;
-                target.y = transform.position.y;
+                target.y = this.transform.position.y;
                 foodTransform = food.transform;
                 currentAction = Action.LookingForFood;
                 StartMove();
@@ -130,7 +158,6 @@ public class Animal : LivingEntity{
             }
         }
         else{
-            Debug.Log("H");
             LookForFood();
         }
         
@@ -159,7 +186,6 @@ public class Animal : LivingEntity{
         if (moveTime >= 1) {
             moving = false;
             moveTime = 0;
-            Debug.Log("yes");
         }
         
     }
@@ -169,7 +195,7 @@ public class Animal : LivingEntity{
         switch(currentAction){
             
             case Action.LookingForFood:
-                if(Vector3.Distance(this.transform.position, foodTransform.position) <= 1.5f){
+                if(Vector3.Distance(this.transform.position, foodTransform.position) <= 3f){
                     currentAction = Action.Eating;
                     Debug.Log("Go");
                 }
@@ -178,7 +204,7 @@ public class Animal : LivingEntity{
                 }
                 break;
             case Action.LookingForWater:
-                if(Vector3.Distance(this.transform.position, target) <= 1f){
+                if(Vector3.Distance(this.transform.position, lastWaterSensed) <= 3f){
                     currentAction = Action.Drinking;
                 }
                 else{
@@ -204,6 +230,16 @@ public class Animal : LivingEntity{
                     lastFood = Time.time;
                     currentAction = Action.Exploring;
                 }
+            }
+        }
+        if(currentAction == Action.Drinking){
+            if(thirst <= 10){
+                thirst += Time.deltaTime * 1.5f;
+            }
+            else{
+                recentlyDrank = true;
+                lastDrink = Time.time;
+                currentAction = Action.Exploring;
             }
         }
     }
