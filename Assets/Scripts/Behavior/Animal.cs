@@ -16,11 +16,12 @@ public class Animal : LivingEntity{
     private Action currentAction;
     private float lastAction;
     private bool moving;
-    private float thirst = 10f, hunger = 10f;
-    private bool recentlyDrank, recentlyAte;
+    public float thirst = 10f, hunger = 10f;
+    private bool recentlyDrank = false, recentlyAte = false;
     private float lastFood;
     private float lastDrink;
     private int numOfTries;
+    private EventHandlerUI eventHandler;
     
     //Movement data
     float moveTime;
@@ -50,21 +51,22 @@ public class Animal : LivingEntity{
     
     protected void Update() {
         thirst -= Time.deltaTime * 0.5f;
-        hunger -= Time.deltaTime * 0.5f;
+        hunger -= Time.deltaTime * 0.15f;
         //Debug.Log("Thirst: " + thirst);
 
         //cooldown so the entity isn't eating or drinking all the time
-        if(Time.time - lastFood > 10f){
+        /*if(Time.time - lastFood > 10f){
             recentlyAte = false;
         }
         if(Time.time - lastDrink > 10f){
             recentlyDrank = false;
-        }
+        }*/
 
         if(moving){
             MoveTo();
         }
         else{
+            EventHandlerUI.ActionChanged(this.transform, currentAction.ToString());
             HandleInteraction();    
             float timeSinceLastAction = Time.time - lastAction;
             if(timeSinceLastAction > betweenActionCooldown && (currentAction != Action.Eating && currentAction != Action.Drinking)){
@@ -75,13 +77,14 @@ public class Animal : LivingEntity{
 
     // chooses next action based on current state of needs; Water > Food
     protected void ChooseNextAction(){
+
         lastAction = Time.time;
 
-        if(thirst < 3 && !recentlyDrank && (currentAction != Action.Drinking && currentAction != Action.LookingForFood)){
+        if(thirst < 3f && !recentlyDrank && currentAction != Action.Drinking && currentAction != Action.LookingForFood){
             numOfTries = 0;
             LookForWater();
         }
-        else if(hunger < 3f && !recentlyAte && (currentAction != Action.Eating && currentAction != Action.LookingForWater)){
+        else if(hunger < 3f && !recentlyAte && currentAction != Action.Eating && currentAction != Action.LookingForWater){
             numOfTries = 0;
             
             LookForFood();
@@ -197,7 +200,6 @@ public class Animal : LivingEntity{
             case Action.LookingForFood:
                 if(Vector3.Distance(this.transform.position, foodTransform.position) <= 3f){
                     currentAction = Action.Eating;
-                    Debug.Log("Go");
                 }
                 else{
                     currentAction = Action.LookingForFood;
@@ -226,7 +228,7 @@ public class Animal : LivingEntity{
                     hunger += Time.deltaTime * 1.5f;
                 }
                 else{
-                    recentlyAte = true;
+                   // recentlyAte = true;
                     lastFood = Time.time;
                     currentAction = Action.Exploring;
                 }
@@ -237,7 +239,7 @@ public class Animal : LivingEntity{
                 thirst += Time.deltaTime * 1.5f;
             }
             else{
-                recentlyDrank = true;
+                //recentlyDrank = true;
                 lastDrink = Time.time;
                 currentAction = Action.Exploring;
             }
