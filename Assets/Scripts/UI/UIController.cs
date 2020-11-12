@@ -7,12 +7,17 @@ public class UIController : MonoBehaviour{
 
     public RectTransform infoPanel;
 
+
+    private Button zoomButton;
     private bool infoPanelVisible;
 
     Animal animal;
 
     private void Start() {
         EventHandlerUI.OnActionChange += UpdateInfo;
+
+        zoomButton = infoPanel.Find("ZoomButton").GetComponent<Button>();
+        zoomButton.onClick.AddListener(delegate {ZoomOnSelected(); });
 
         infoPanelVisible = false;
 
@@ -23,28 +28,41 @@ public class UIController : MonoBehaviour{
         if(infoPanelVisible){            
             UpdateNeeds();
         }
+        // A way to get mouse inputs from the user about info etc
         Ray interactionRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit interactionInfo;
         if(Physics.Raycast(interactionRay, out interactionInfo, Mathf.Infinity)){
             GameObject interactedObject = interactionInfo.collider.gameObject;
-
+            if(infoPanelVisible){
+                if(Input.GetMouseButtonDown(1)){
+                    ToggleInfoPanel();
+                }
+            }
             if(interactedObject.tag == "Passive"){
                 if(Input.GetMouseButtonDown(0)){
                     animal = interactedObject.GetComponent<Animal>();
+                    UpdatePanel();
                     ToggleInfoPanel();
                 }
                 
             }
         }
     }
-    
-    private void UpdateInfo(Transform entity, string action){
-        Text name = infoPanel.Find("CreatureName").GetComponent<Text>();
+    // Method that updates the info that there is about the creature being viewed
+    private void UpdateInfo(string action){
         Text currentAction = infoPanel.Find("CurrentAction").GetComponent<Text>();
 
-        name.text = entity.name;
         currentAction.text = action;
+    
     }
+    private void UpdatePanel(){
+        Text name = infoPanel.Find("CreatureName").GetComponent<Text>();
+        Text animalGender = infoPanel.Find("Gender").GetComponent<Text>();
+
+        name.text = animal.GetComponent<Animal>().GetName();
+        animalGender.text = animal.GetComponent<Animal>().GetGender() ? "Male" : "Female";
+    }
+    //updates the sliders for thirst and hunger
     private void UpdateNeeds(){
         Slider thirstBar = infoPanel.Find("Thirst").GetComponent<Slider>();
         Slider hungerBar = infoPanel.Find("Hunger").GetComponent<Slider>();
@@ -53,7 +71,13 @@ public class UIController : MonoBehaviour{
         hungerBar.value = animal.hunger;
 
     }
-   
+    
+
+    private void ZoomOnSelected(){
+        if(infoPanelVisible){
+            Debug.Log("Pepaaa");
+        }
+    }
 
     private void ToggleInfoPanel(){
         infoPanelVisible = !infoPanelVisible;

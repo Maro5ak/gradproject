@@ -11,11 +11,14 @@ public class Animal : LivingEntity{
     private const float distance = 1f;
     private const int maxTries = 5;
 
+    [SerializeField]
+    protected bool male;
     private Vector3 target;
     private Transform foodTransform;
     private Action currentAction;
     private float lastAction;
     private bool moving;
+    [HideInInspector]
     public float thirst = 10f, hunger = 10f;
     private bool recentlyDrank = false, recentlyAte = false;
     private float lastFood;
@@ -66,7 +69,7 @@ public class Animal : LivingEntity{
             MoveTo();
         }
         else{
-            EventHandlerUI.ActionChanged(this.transform, currentAction.ToString());
+            EventHandlerUI.ActionChanged(currentAction.ToString());
             HandleInteraction();    
             float timeSinceLastAction = Time.time - lastAction;
             if(timeSinceLastAction > betweenActionCooldown && (currentAction != Action.Eating && currentAction != Action.Drinking)){
@@ -260,5 +263,9 @@ public class Animal : LivingEntity{
     private void OnDrawGizmos() {
         Handles.Label(transform.position, currentAction.ToString());
         Gizmos.DrawSphere(target, 0.5f);
+    }
+
+    public virtual bool GetGender(){
+        return male;
     }
 }
