@@ -58,7 +58,9 @@ public class UIController : MonoBehaviour{
     private void UpdatePanel(){
         Text name = infoPanel.Find("CreatureName").GetComponent<Text>();
         Text animalGender = infoPanel.Find("Gender").GetComponent<Text>();
+        Text animalAge = infoPanel.Find("Age").GetComponent<Text>();
 
+        animalAge.text = "Age: " + animal.GetComponent<Animal>().GetAge().ToString() + "yr(s)";
         name.text = animal.GetComponent<Animal>().GetName();
         animalGender.text = animal.GetComponent<Animal>().GetGender() ? "Male" : "Female";
     }

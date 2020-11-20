@@ -7,9 +7,7 @@ public class CameraController : MonoBehaviour{
 
     float zoomSpeed = 500;
 
-    private void Start() {
-        
-    }
+    
 
     private void Update() {
         if(Input.GetMouseButton(1)){
