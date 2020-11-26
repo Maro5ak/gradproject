@@ -7,7 +7,7 @@ public class Animal : LivingEntity{
 
     public LayerMask groundMask;
     
-    private const float betweenActionCooldown = 2f;
+    private const float betweenActionCooldown = 2.5f;
     private const float distance = 1f;
     private const int maxTries = 5;
 
@@ -17,18 +17,19 @@ public class Animal : LivingEntity{
     protected bool male;
     protected int age, liveSpan;
     private Vector3 target;
-    private Transform foodTransform;
-    private Action currentAction;
+    private Transform foodTransform, nestTransform;
+    protected Action currentAction;
     private float lastAction;
     private bool moving;
     [HideInInspector]
     public float thirst = 10f, hunger = 10f;
-    private bool recentlyDrank = false, recentlyAte = false, canFindMate = false;
+    protected bool recentlyDrank = false, recentlyAte = false, canMate = true;
     private float lastFood;
     private float lastDrink;
     private float lastMate;
+    protected float lastChild;
     private int numOfTries;
-    private Action matingMethod;
+    protected bool mating, pregnant;
     
     private EventHandlerUI eventHandler;
     
@@ -54,17 +55,20 @@ public class Animal : LivingEntity{
 
         EventHandler.OnTimeAdvanced += AddAge;
 
-        matingMethod = male ? Action.MaleMating : Action.FemaleMating;
+        Physics.IgnoreLayerCollision(9, 9);
+
 
         age = 0;
-        canFindMate = true;
         recentlyAte = false;
         recentlyDrank = false;
+        pregnant = false;
+        mating = false;
         prng = new System.Random();
         currentAction = Action.Exploring;
         ChooseNextAction();
     }
 
+    //placeholder function for calculating live span based on the genes, gonna be expanded onto later
     protected void CalculateLiveSpan(){
         string dna = "";
         foreach(string s in genes){
@@ -73,7 +77,7 @@ public class Animal : LivingEntity{
         Debug.Log(dna);
         switch(dna){
             case "AB":
-                liveSpan = 3;
+                liveSpan = 9;
                 break;
             case "BA":
                 liveSpan = 8;
@@ -87,13 +91,23 @@ public class Animal : LivingEntity{
         }
     
     }
+
+    
     
     protected void Update() {
-        thirst -= Time.deltaTime * 0.5f;
-        hunger -= Time.deltaTime * 0.15f;
+        thirst -= Time.deltaTime * 0.05f;
+        hunger -= Time.deltaTime * 0.015f;
 
         if(age > liveSpan){
             Die(CauseOfDeath.OldAge);
+        }
+
+        if(!male && pregnant){
+            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.transform.position = new Vector3(0, 0.5f, 0);
+            pregnant = false;
+            //lastChild = Time.time;
+
         }
         //Debug.Log("Thirst: " + thirst);
 
@@ -104,18 +118,20 @@ public class Animal : LivingEntity{
         if(Time.time - lastDrink > 10f){
             recentlyDrank = false;
         }*/
-        if(Time.time - lastMate > 30f){
-            canFindMate = true;
+        
+        if(Time.time - lastChild > 120f){
+            canMate = true;
         }
+        
 
         if(moving){
             MoveTo();
         }
         else{
-            EventHandlerUI.ActionChanged(currentAction.ToString());
+            EventHandlerUI.ActionChanged();
             HandleInteraction();    
             float timeSinceLastAction = Time.time - lastAction;
-            if(timeSinceLastAction > betweenActionCooldown && (currentAction != Action.Eating && currentAction != Action.Drinking && currentAction != matingMethod)){
+            if(timeSinceLastAction > betweenActionCooldown && (currentAction != Action.Eating && currentAction != Action.Drinking && currentAction != Action.Nesting)){
                 ChooseNextAction();
             }
         }
@@ -125,8 +141,13 @@ public class Animal : LivingEntity{
     protected void ChooseNextAction(){
 
         lastAction = Time.time;
-
-        if(thirst < 3f && !recentlyDrank && currentAction != Action.Drinking && currentAction != Action.LookingForFood){
+        if(hunger >= 8f && thirst >= 8f && !pregnant && canMate){
+            if(age >= 1 && age <= 5){
+                numOfTries = 0;
+                LookForNest();
+            }
+        }
+        else if(thirst < 3f && !recentlyDrank && currentAction != Action.Drinking && currentAction != Action.LookingForFood){
             numOfTries = 0;
             LookForWater();
         }
@@ -135,12 +156,9 @@ public class Animal : LivingEntity{
             
             LookForFood();
         }
-        else if(age >= 2 && age <= 5 && canFindMate){
-            if(hunger >= 5f && thirst >= 5f){
-                numOfTries = 0;
-                LookForMate();
-            }
-        }
+
+        
+        
 
         /*else if(currentAction != Action.Eating || currentAction != Action.Drinking){
             currentAction = Action.Exploring;
@@ -217,39 +235,54 @@ public class Animal : LivingEntity{
         }
     }
 
-    private void LookForMate(){
-        if(male){
-            target = GetTarget();
-            Collider[] cols = Physics.OverlapSphere(target, 0.7f, groundMask);
-            LivingEntity mate = null;
-            if(numOfTries == maxTries) {
-                lastMate = Time.time;
-                canFindMate = false;
-            }
-            else if(cols.Length != 0) {
-                mate = cols[0].GetComponent<Environment>().GetEntity("Mate");
-                if(mate != null){
-                    target = mate.transform.position;
-                    target += (startPosition - target).normalized * distance;
-                    target.y = this.transform.position.y;
-                    foodTransform = mate.transform;
-                    currentAction = Action.LookingForMate;
+    //potentially solution for looking for mate and reproduction system. THIS HAS TO BE CHANGED FOR BETTER!!
+    protected void LookForNest(){
+        target = GetTarget();
+        Collider[] cols = Physics.OverlapSphere(target, 0.7f, groundMask);
+        LivingEntity nest = null;
+        if(numOfTries == maxTries) {
+            ChoosePath();
+        }
+        else if(cols.Length != 0) {
+            nest = cols[0].GetComponent<Environment>().GetEntity("nest");
+            if(nest != null){
+                target = nest.transform.position;
+                target += (startPosition - target).normalized * distance;
+                target.y = this.transform.position.y;
+                nestTransform = nest.transform;
+                //checks whether nest found is full
+                if(nestTransform.GetComponent<Nest>().GetOwner() != null){
+                    
+                    //if the gender is male, and nest is full.
+                    //if female, get outta there
+                    if(male){
+                        currentAction = Action.LookingForNest;
+                        StartMove();
+                        
+                    }
+                    else{
+                        currentAction = Action.Exploring;
+                    }
+                }
+                //if nest isn't full and gender is female, go in
+                else if(!male){
+                    currentAction = Action.LookingForNest;
                     StartMove();
                 }
+                //if neither, get outta there
                 else{
-                    numOfTries++;
-                    LookForMate();
+                    currentAction = Action.Exploring;
                 }
+               
             }
             else{
-                LookForMate();
+                numOfTries++;
+                LookForNest();
             }
         }
         else{
-            ChoosePath();
-            currentAction = matingMethod;
+            LookForNest();
         }
-        
     }
 
     // starts movement method, calculates jump height and relative movement speed based on movement angle
@@ -281,12 +314,14 @@ public class Animal : LivingEntity{
     // determines what to do based on currently chosen action earlier
     protected void DoAction(){
         switch(currentAction){    
-            case Action.LookingForMate:
-                if(Vector3.Distance(this.transform.position, foodTransform.position) <= 3f){
-                    currentAction = matingMethod;
+            case Action.LookingForNest:
+                if(Vector3.Distance(this.transform.position, nestTransform.position) <= 3f){
+                    if(!male) nestTransform.GetComponent<Nest>().AddOwner(this.transform);
+                    if(male) lastMate = Time.time;
+                    currentAction = Action.Nesting;
                 }
                 else{
-                    currentAction = Action.LookingForMate;
+                    currentAction = Action.LookingForNest;
                 }
                 break;
             case Action.LookingForFood:
@@ -313,16 +348,33 @@ public class Animal : LivingEntity{
 
     // handles current interacion and keeps on doing until satisfied
     protected void HandleInteraction(){
-        if(currentAction == matingMethod){
-            if(male){
-                lastMate = Time.time;
-                canFindMate = false;
-                currentAction = Action.Exploring;
-            }
-            else{
-                currentAction = Action.Pregnant;
+        if(currentAction == Action.Nesting){
+            if(nestTransform != null){
+                if(male){
+                    mating = true;
+                    
+                    if(Time.time - lastMate > 10f){
+                        currentAction = Action.Exploring;
+                        mating = false;
+                        nestTransform.GetComponent<Nest>().GetOwner().GetComponent<Animal>().SetState(true);
+                        canMate = false;
+                    }
+                }
+                else if(!male){
+                    if(thirst < 5f || hunger < 5f){
+                        currentAction = Action.Exploring;
+                    }
+                    mating = true;
+                    if(pregnant){
+                        currentAction = Action.Exploring;
+                        nestTransform.GetComponent<Nest>().RemoveOwner();
+                        mating = false;
+                        canMate = false;
+                    }
+                }
             }
         }
+        
         
         if(currentAction == Action.Eating){
             if(foodTransform != null){
@@ -358,8 +410,11 @@ public class Animal : LivingEntity{
             );
     }  
 
+
+    //increments age each cycle, which is currently 10 seconds for a year. Cycle created inside WorldController class
     private void AddAge(){
         age += 1;
+        EventHandlerUI.AgeChanged();
     }
 
     // debug 
@@ -373,5 +428,16 @@ public class Animal : LivingEntity{
     }
     public virtual int GetAge(){
         return age;
+    }
+    public virtual bool GetMating(){
+        return mating;
+    }
+
+    public virtual string GetAction(){
+        return currentAction.ToString();
+    }
+
+    public virtual void SetState(bool state){
+        this.pregnant = state;
     }
 }

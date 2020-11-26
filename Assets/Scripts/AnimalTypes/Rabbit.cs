@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Rabbit : Animal{
 
+
+    //currently static setting up of genes, will be automated later
     protected void Start() {
         genes.Add("A");
         genes.Add("B");
@@ -16,10 +18,17 @@ public class Rabbit : Animal{
 
     public override int GetAge()
     {
-        return base.GetAge();
+        return this.age;
     }
 
     public override bool GetGender(){
-        return base.GetGender();
+        return this.male;
+    }
+    public override bool GetMating(){
+        return this.mating;
+    }
+
+    public override string GetAction(){
+        return this.currentAction.ToString();
     }
 }

@@ -7,8 +7,6 @@ public enum Action {
     Eating,
     Drinking,
     Exploring,
-    MaleMating,
-    FemaleMating,
-    LookingForMate,
-    Pregnant
+    LookingForNest,
+    Nesting
 }

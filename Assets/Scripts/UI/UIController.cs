@@ -14,7 +14,8 @@ public class UIController : MonoBehaviour{
     Animal animal;
 
     private void Start() {
-        EventHandlerUI.OnActionChange += UpdateInfo;
+        EventHandlerUI.OnActionChange += UpdatePanel;
+        EventHandlerUI.OnAgeChange += UpdatePanel;
 
         zoomButton = infoPanel.Find("ZoomButton").GetComponent<Button>();
         zoomButton.onClick.AddListener(delegate {ZoomOnSelected(); });
@@ -49,20 +50,18 @@ public class UIController : MonoBehaviour{
         }
     }
     // Method that updates the info that there is about the creature being viewed
-    private void UpdateInfo(string action){
-        Text currentAction = infoPanel.Find("CurrentAction").GetComponent<Text>();
-
-        currentAction.text = action;
-    
-    }
     private void UpdatePanel(){
         Text name = infoPanel.Find("CreatureName").GetComponent<Text>();
         Text animalGender = infoPanel.Find("Gender").GetComponent<Text>();
         Text animalAge = infoPanel.Find("Age").GetComponent<Text>();
+        Text currentAction = infoPanel.Find("CurrentAction").GetComponent<Text>();
 
-        animalAge.text = "Age: " + animal.GetComponent<Animal>().GetAge().ToString() + "yr(s)";
-        name.text = animal.GetComponent<Animal>().GetName();
-        animalGender.text = animal.GetComponent<Animal>().GetGender() ? "Male" : "Female";
+        if(animal != null){
+            currentAction.text = animal.GetComponent<Animal>().GetAction();
+            animalAge.text = "Age: " + animal.GetComponent<Animal>().GetAge().ToString() + "yr(s)";
+            name.text = animal.GetComponent<Animal>().GetName();
+            animalGender.text = animal.GetComponent<Animal>().GetGender() ? "Male" : "Female";
+        }
     }
     //updates the sliders for thirst and hunger
     private void UpdateNeeds(){

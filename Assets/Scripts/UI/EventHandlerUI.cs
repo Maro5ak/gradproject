@@ -3,12 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class EventHandlerUI : MonoBehaviour{
-    public delegate void ActionChangeHandler(string action);
+    public delegate void ActionChangeHandler();
     public static event ActionChangeHandler OnActionChange;
 
-    public static void ActionChanged(string action){
+    public delegate void AgeChangeHandler();
+    public static event AgeChangeHandler OnAgeChange;
+
+    public static void ActionChanged(){
         if(OnActionChange != null) {
-            OnActionChange(action);
+            OnActionChange();
+        }
+    }
+
+    public static void AgeChanged(){
+        if(OnAgeChange != null){
+            OnAgeChange();
         }
     }
 
