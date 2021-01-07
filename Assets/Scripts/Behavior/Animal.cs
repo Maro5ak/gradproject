@@ -103,8 +103,9 @@ public class Animal : LivingEntity{
         }
 
         if(!male && pregnant){
-            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            cube.transform.position = new Vector3(0, 0.5f, 0);
+            //GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            Transform baby = Instantiate(Resources.Load<Transform>("Assets/AnimalRabbit"));
+            baby.transform.position = nestTransform.position;
             pregnant = false;
             //lastChild = Time.time;
 
