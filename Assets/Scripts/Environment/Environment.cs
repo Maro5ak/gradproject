@@ -36,5 +36,9 @@ public class Environment : MonoBehaviour{
 
     }
 
+    public bool GetEntityBool(string entityName){
+        return entitiesOnTop.Find(x => x.GetName() == entityName);
+    }
+
     
 }

@@ -22,7 +22,12 @@ public class SceneLoader : MonoBehaviour{
     }
 
     private void SimulationStart(){
+        
+        ApplicationControl.maxPopulation = populationSlider.value;
+        ApplicationControl.maxTrees = treeSlider.value;
+        ApplicationControl.sceneSwitch = true;
         SceneManager.LoadScene("SampleScene");
+        
     }
 
     private void UpdatePopulation(){
