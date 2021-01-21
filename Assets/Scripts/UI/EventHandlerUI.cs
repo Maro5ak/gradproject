@@ -9,6 +9,9 @@ public class EventHandlerUI : MonoBehaviour{
     public delegate void AgeChangeHandler();
     public static event AgeChangeHandler OnAgeChange;
 
+    public delegate void LoadingScreenHandler();
+    public static event LoadingScreenHandler OnLoading;
+
     public static void ActionChanged(){
         if(OnActionChange != null) {
             OnActionChange();
@@ -18,6 +21,12 @@ public class EventHandlerUI : MonoBehaviour{
     public static void AgeChanged(){
         if(OnAgeChange != null){
             OnAgeChange();
+        }
+    }
+
+    public static void Loading(){
+        if(OnLoading != null){
+            OnLoading();
         }
     }
 

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4142542827811948633}
   - component: {fileID: 2204990894044757139}
   - component: {fileID: 7224252253073302347}
+  - component: {fileID: 2654596202398533627}
   m_Layer: 0
   m_Name: EntityBush
   m_TagString: Untagged
@@ -26,7 +27,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 403441573199453510}
-  m_LocalRotation: {x: 0.00000008146034, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -2.4527333, y: 0.45230618, z: -5.1319966}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -90,8 +91,23 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 403441573199453510}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 2.0887768, y: 1.4495823, z: 1.7390032}
   m_Center: {x: 0.13013098, y: 0.272484, z: -0.00000011920929}
+--- !u!114 &2654596202398533627
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 403441573199453510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c19ce93501febb8428524f0671600ac8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  groundLayerMask:
+    serializedVersion: 2
+    m_Bits: 256

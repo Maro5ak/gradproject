@@ -36,6 +36,14 @@ public class Environment : MonoBehaviour{
 
     }
 
+    public int GetEntityCount(string entityName){
+        int entitiesSum = 0;
+        foreach(LivingEntity ent in entitiesOnTop){
+            if(ent.GetName() == "EntityBush") entitiesSum++;
+        }
+        return entitiesSum;
+    }
+
     public bool GetEntityBool(string entityName){
         return entitiesOnTop.Find(x => x.GetName() == entityName);
     }

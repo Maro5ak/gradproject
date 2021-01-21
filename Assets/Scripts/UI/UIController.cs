@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class UIController : MonoBehaviour{
 
     public RectTransform infoPanel;
+    public RectTransform loadingScreen;
 
 
     private Button zoomButton;
@@ -16,12 +17,14 @@ public class UIController : MonoBehaviour{
     private void Start() {
         EventHandlerUI.OnActionChange += UpdatePanel;
         EventHandlerUI.OnAgeChange += UpdatePanel;
+        EventHandlerUI.OnLoading += LoadingDone;
 
         zoomButton = infoPanel.Find("ZoomButton").GetComponent<Button>();
         zoomButton.onClick.AddListener(delegate {ZoomOnSelected(); });
 
         infoPanelVisible = false;
 
+        loadingScreen.gameObject.SetActive(true);
         infoPanel.gameObject.SetActive(infoPanelVisible);
     }
 
@@ -71,6 +74,10 @@ public class UIController : MonoBehaviour{
         thirstBar.value = animal.thirst;
         hungerBar.value = animal.hunger;
 
+    }
+
+    private void LoadingDone(){
+        loadingScreen.gameObject.SetActive(false);
     }
     
 
