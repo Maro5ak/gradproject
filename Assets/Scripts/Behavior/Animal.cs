@@ -68,7 +68,6 @@ public class Animal : LivingEntity{
         ChooseNextAction();
     }
 
-    //placeholder function for calculating live span based on the genes, gonna be expanded onto later
     protected void CalculateLiveSpan(){
         string dna = "";
         foreach(string s in genes){
@@ -92,6 +91,7 @@ public class Animal : LivingEntity{
     
     }
 
+
     
     
     protected void Update() {
@@ -110,15 +110,6 @@ public class Animal : LivingEntity{
             //lastChild = Time.time;
 
         }
-        //Debug.Log("Thirst: " + thirst);
-
-        //cooldown so the entity isn't eating or drinking all the time
-        /*if(Time.time - lastFood > 10f){
-            recentlyAte = false;
-        }
-        if(Time.time - lastDrink > 10f){
-            recentlyDrank = false;
-        }*/
         
         if(Time.time - lastChild > 120f){
             canMate = true;
@@ -426,6 +417,9 @@ public class Animal : LivingEntity{
 
     public virtual bool GetGender(){
         return male;
+    }
+    public virtual void SetGender(bool gender){
+        male = gender;
     }
     public virtual int GetAge(){
         return age;

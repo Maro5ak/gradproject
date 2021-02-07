@@ -24,7 +24,7 @@ public class UIController : MonoBehaviour{
 
         infoPanelVisible = false;
 
-        loadingScreen.gameObject.SetActive(true);
+        loadingScreen.gameObject.SetActive(false);
         infoPanel.gameObject.SetActive(infoPanelVisible);
     }
 

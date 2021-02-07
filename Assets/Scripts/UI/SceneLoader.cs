@@ -11,11 +11,15 @@ public class SceneLoader : MonoBehaviour{
     public Slider treeSlider;
     public Slider plantSlider;
     public Slider bushSlider;
+    public Slider genderSlider;
 
     public Text populationText;
     public Text treeDensityText;
     public Text bushDensityText;
     public Text plantDensityText;
+    public Text malePerc, femalePerc;
+
+    private int male, female;
 
 
     void Start(){
@@ -24,11 +28,16 @@ public class SceneLoader : MonoBehaviour{
         treeSlider.onValueChanged.AddListener(delegate { UpdateTreeDensity(); });
         plantSlider.onValueChanged.AddListener(delegate { UpdatePlantDensity(); });
         bushSlider.onValueChanged.AddListener(delegate { UpdateBushDensity(); });
+        genderSlider.onValueChanged.AddListener(delegate { UpdateGenderPercentages(); });
 
         populationText.text = populationSlider.value + "";
         plantDensityText.text = plantSlider.value * 100 + "%";
         bushDensityText.text = bushSlider.value * 100 + "%";
         treeDensityText.text = treeSlider.value * 100+ "%";
+        male = Mathf.RoundToInt(genderSlider.value * 100);
+        female = 100 - male;
+        malePerc.text = male + "%";
+        femalePerc.text = female + "%";
     }
 
     private void SimulationStart(){
@@ -37,6 +46,8 @@ public class SceneLoader : MonoBehaviour{
         ApplicationControl.maxTrees = treeSlider.value;
         ApplicationControl.maxBushes = bushSlider.value;
         ApplicationControl.maxPlants = plantSlider.value;
+        ApplicationControl.malePop = male;
+        ApplicationControl.femalePop = female;
         ApplicationControl.sceneSwitch = true;
         SceneManager.LoadScene("SampleScene");
         
@@ -56,6 +67,13 @@ public class SceneLoader : MonoBehaviour{
 
     private void UpdateBushDensity(){
         bushDensityText.text = Mathf.RoundToInt(bushSlider.value * 100) + "%";
+    }
+    private void UpdateGenderPercentages(){
+        male = Mathf.RoundToInt(genderSlider.value * 100);
+        female = 100 - male;
+        
+        malePerc.text = male + "%";
+        femalePerc.text = female + "%";
     }
 
 

@@ -5,8 +5,8 @@ using UnityEngine;
 public class WorldController : MonoBehaviour{
     private float startTime;
 
-    //constant value for 10 seconds
-    const float yearLength = 10f;
+    //constant value for 60 seconds
+    const float yearLength = 60f;
 
     
     private void Start() {

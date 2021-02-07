@@ -10,16 +10,25 @@ public class MapGenerator : MonoBehaviour{
     private int maxBushes;
     private int maxPopulation;
     private int maxPlants;
+    private int currentPopulation = 0;
+    private int currentMales = 0;
+    private int currentFemales = 0;
+    private int maxNests;
+    private int currentNests;
     private int currentPlants = 0;
     private int currentTrees = 0;
     private int currentBushes = 0;
     private Vector3 spawnPosition;
 
     private bool spawning;
+    private bool respawning;
     System.Random prng;
 
 
     void Start(){
+        EventHandler.OnTimeAdvanced += RespawnPlants;
+
+        respawning = false;
         spawning = false;
         prng = new System.Random();
     }
@@ -27,16 +36,20 @@ public class MapGenerator : MonoBehaviour{
     // Update is called once per frame
     void Update(){
         //DEBUG
-        if(Input.GetKeyDown(KeyCode.E)){
+        /*if(Input.GetKeyDown(KeyCode.E)){
             ApplicationControl.sceneSwitch = true;
             ApplicationControl.maxBushes = 0.3f;
             ApplicationControl.maxTrees = 0.2f;
             ApplicationControl.maxPlants = 0.5f;
+            ApplicationControl.maxPopulation = 10;
+            ApplicationControl.malePop = 5;
+            ApplicationControl.femalePop = 5;
+            //spawning = true;
             //GetFreePosition();
             
         }
-
-        if(currentTrees == maxTrees && currentBushes == maxBushes && currentPlants == maxPlants && spawning){
+        */
+        if(currentTrees == maxTrees && currentBushes == maxBushes && currentPlants == maxPlants && currentNests == maxNests && currentPopulation == maxPopulation && spawning){
             EventHandlerUI.Loading();
             spawning = false;
         }
@@ -45,6 +58,20 @@ public class MapGenerator : MonoBehaviour{
             StartSpawning();
             
         }
+
+        if(respawning){
+            if(currentPlants == maxPlants){
+                respawning = false;
+            }
+            else{
+               if(GetFreePlantPosition()){
+                   Transform plant = Instantiate(Resources.Load<Transform>("Assets/EntityPlant"));
+                   plant.position = new Vector3(spawnPosition.x, 0f, spawnPosition.z);
+                   currentPlants++;
+               }
+            }
+        }
+
         if(spawning){
             
             if(currentTrees < maxTrees){
@@ -70,6 +97,28 @@ public class MapGenerator : MonoBehaviour{
                    currentPlants++;
                }
            }
+           else if(currentPopulation < maxPopulation){
+               if(GetFreeAnimalPosition()){
+                   Transform rabbit = Resources.Load<Transform>("Assets/AnimalRabbit");
+                   Instantiate(rabbit, spawnPosition, default);                    
+                   if(currentMales < ApplicationControl.malePop){    
+                       rabbit.GetComponent<Rabbit>().SetGender(true);
+                       currentMales++;
+                   }
+                   else if(currentFemales < ApplicationControl.femalePop){
+                       rabbit.GetComponent<Rabbit>().SetGender(false);
+                       currentFemales++;
+                   }
+                   currentPopulation++;
+               }
+           }
+           else if(currentNests < maxNests){
+               if(GetFreeNestPosition()){
+                   Transform nest = Instantiate(Resources.Load<Transform>("Assets/EntityNest"));
+                   nest.position = new Vector3(spawnPosition.x, 0f, spawnPosition.z);
+                   currentNests++;
+               }
+           }
         }
     }
 
@@ -78,6 +127,8 @@ public class MapGenerator : MonoBehaviour{
         maxTrees = Mathf.RoundToInt(113 * ApplicationControl.maxTrees);
         maxBushes = Mathf.RoundToInt(200 * ApplicationControl.maxBushes);
         maxPlants = Mathf.RoundToInt(800 * ApplicationControl.maxPlants);
+        maxPopulation = (int)ApplicationControl.maxPopulation;
+        maxNests = ApplicationControl.femalePop;
         spawning = true;
     }
 
@@ -88,7 +139,7 @@ public class MapGenerator : MonoBehaviour{
         if(cols.Length > 0){
             Environment tile = cols[0].GetComponent<Environment>();
             if(tile.waterTile) return false;
-            else if(tile.GetEntityBool("EntityTree") ) return false;
+            else if(tile.GetEntityBool("EntityTree") || tile.GetEntityBool("EntityTree2")) return false;
             else {
                 spawnPosition = position;
                 tile.walkable = false;
@@ -126,6 +177,44 @@ public class MapGenerator : MonoBehaviour{
             }
         }    
         else return false;
+    }
+    
+    private bool GetFreeAnimalPosition(){
+        Vector3 position = new Vector3(prng.Next(-25, 25), 0f, prng.Next(5, 55));
+        Debug.Log("DAMIAN: " + position);
+        Collider[] cols = Physics.OverlapSphere(position, 0.5f, groundLayer);
+        if(cols.Length > 0){
+            Environment tile = cols[0].GetComponent<Environment>();
+            if(tile.waterTile) return false;
+            else if(!tile.walkable) return false;
+            else if(tile.GetEntity("Rabbit")) return false;
+            else{
+                spawnPosition = position;
+                return true;
+            }
+        }
+        else return false;
+    }
+
+    private bool GetFreeNestPosition(){
+        Vector3 position = new Vector3(prng.Next(-25, 25), 0f, prng.Next(5, 55));
+        Collider[] cols = Physics.OverlapSphere(position, 0.5f, groundLayer);
+        if(cols.Length > 0){
+            Environment tile = cols[0].GetComponent<Environment>();
+            if(tile.waterTile) return false;
+            else if(!tile.walkable) return false;
+            else if(tile.GetEntity("EntityNest")) return false;
+            else{
+                spawnPosition = position;
+                return true;
+            }
+        }
+        else return false;
+    }
+
+    private void RespawnPlants(){
+        respawning = true;
+        currentPlants = Mathf.RoundToInt(maxPlants / 5);
     }
 
     private void OnDrawGizmos() {

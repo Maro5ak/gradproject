@@ -5,10 +5,18 @@ using UnityEngine;
 public class Rabbit : Animal{
 
 
-    //currently static setting up of genes, will be automated later
+    //gene randomization for each animal
     protected void Start() {
-        genes.Add("A");
-        genes.Add("B");
+        for(int i = 0; i < 2; i++){
+            switch(Random.Range(0, 2)){
+                case 0: 
+                    genes.Add("A");
+                    break;
+                case 1:
+                    genes.Add("B");
+                    break;
+            }
+        }        
         CalculateLiveSpan();
     }
 
@@ -16,6 +24,10 @@ public class Rabbit : Animal{
         return "Rabbit";
     }
 
+    public override void SetGender(bool gender)
+    {
+        this.male = gender;
+    }
     public override int GetAge()
     {
         return this.age;
