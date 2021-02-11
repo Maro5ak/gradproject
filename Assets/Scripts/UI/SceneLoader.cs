@@ -46,9 +46,11 @@ public class SceneLoader : MonoBehaviour{
         ApplicationControl.maxTrees = treeSlider.value;
         ApplicationControl.maxBushes = bushSlider.value;
         ApplicationControl.maxPlants = plantSlider.value;
+        male = Mathf.RoundToInt(genderSlider.value * populationSlider.value);
+        female = Mathf.RoundToInt(populationSlider.value - male);
         ApplicationControl.malePop = male;
         ApplicationControl.femalePop = female;
-        ApplicationControl.sceneSwitch = true;
+        ApplicationControl.sceneSwitch = true;      
         SceneManager.LoadScene("SampleScene");
         
     }
@@ -71,7 +73,6 @@ public class SceneLoader : MonoBehaviour{
     private void UpdateGenderPercentages(){
         male = Mathf.RoundToInt(genderSlider.value * 100);
         female = 100 - male;
-        
         malePerc.text = male + "%";
         femalePerc.text = female + "%";
     }

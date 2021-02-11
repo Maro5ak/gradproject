@@ -106,6 +106,8 @@ public class Animal : LivingEntity{
             //GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             Transform baby = Instantiate(Resources.Load<Transform>("Assets/AnimalRabbit"));
             baby.transform.position = nestTransform.position;
+            if(Random.Range(0, 2) == 1) baby.GetComponent<Rabbit>().SetGender(true);
+            else baby.GetComponent<Rabbit>().SetGender(false);
             pregnant = false;
             //lastChild = Time.time;
 

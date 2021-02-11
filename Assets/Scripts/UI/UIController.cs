@@ -20,11 +20,10 @@ public class UIController : MonoBehaviour{
         EventHandlerUI.OnLoading += LoadingDone;
 
         zoomButton = infoPanel.Find("ZoomButton").GetComponent<Button>();
-        zoomButton.onClick.AddListener(delegate {ZoomOnSelected(); });
 
         infoPanelVisible = false;
 
-        loadingScreen.gameObject.SetActive(false);
+        loadingScreen.gameObject.SetActive(true);
         infoPanel.gameObject.SetActive(infoPanelVisible);
     }
 
@@ -80,12 +79,6 @@ public class UIController : MonoBehaviour{
         loadingScreen.gameObject.SetActive(false);
     }
     
-
-    private void ZoomOnSelected(){
-        if(infoPanelVisible){
-            Debug.Log("Pepaaa");
-        }
-    }
 
     private void ToggleInfoPanel(){
         infoPanelVisible = !infoPanelVisible;
