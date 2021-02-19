@@ -5,14 +5,19 @@ using UnityEngine;
 public class MapGenerator : MonoBehaviour{
 
     public LayerMask groundLayer;
+    private ApplicationControl aplication = new ApplicationControl();
 
     private int maxTrees;
     private int maxBushes;
-    private int maxPopulation;
+    private int maxRabbitPopulation;
+    private int maxSheepPopulation;
     private int maxPlants;
-    private int currentPopulation = 0;
-    private int currentMales = 0;
-    private int currentFemales = 0;
+    private int currentSheepPopulation = 0;
+    private int currentSheepMales = 0;
+    private int currentSheepFemales = 0;
+    private int currentRabbitPopulation = 0;
+    private int currentRabbitMales = 0;
+    private int currentRabbitFemales = 0;
     private int maxNests;
     private int currentNests;
     private int currentPlants = 0;
@@ -49,7 +54,7 @@ public class MapGenerator : MonoBehaviour{
             
         }
         */
-        if(currentTrees == maxTrees && currentBushes == maxBushes && currentPlants == maxPlants && currentNests == maxNests && currentPopulation == maxPopulation && spawning){
+        if(currentTrees == maxTrees && currentBushes == maxBushes && currentPlants == maxPlants && currentNests == maxNests && currentRabbitPopulation == maxRabbitPopulation && currentSheepPopulation == maxSheepPopulation && spawning){
             EventHandlerUI.Loading();
             spawning = false;
         }
@@ -97,19 +102,34 @@ public class MapGenerator : MonoBehaviour{
                    currentPlants++;
                }
            }
-           else if(currentPopulation < maxPopulation){
+           else if(currentRabbitPopulation < maxRabbitPopulation){
                if(GetFreeAnimalPosition()){
                    Transform rabbit = Resources.Load<Transform>("Assets/AnimalRabbit");
                    Instantiate(rabbit, spawnPosition, default);                    
-                   if(currentMales < ApplicationControl.malePop){    
+                   if(currentRabbitMales < ApplicationControl.rabbitMalePop){    
                        rabbit.GetComponent<Rabbit>().SetGender(true);
-                       currentMales++;
+                       currentRabbitMales++;
                    }
-                   else if(currentFemales < ApplicationControl.femalePop){
+                   else if(currentRabbitFemales < ApplicationControl.rabbitFemalePop){
                        rabbit.GetComponent<Rabbit>().SetGender(false);
-                       currentFemales++;
+                       currentRabbitFemales++;
                    }
-                   currentPopulation++;
+                   currentRabbitPopulation++;
+               }
+           }
+           else if(currentSheepPopulation < maxSheepPopulation){
+               if(GetFreeAnimalPosition()){
+                   Transform sheep = Resources.Load<Transform>("Assets/AnimalSheep");
+                   Instantiate(sheep, spawnPosition, default);                    
+                   if(currentSheepMales < ApplicationControl.sheepMalePop){    
+                       sheep.GetComponent<Sheep>().SetGender(true);
+                       currentRabbitMales++;
+                   }
+                   else if(currentSheepFemales < ApplicationControl.sheepFemalePop){
+                       sheep.GetComponent<Sheep>().SetGender(false);
+                       currentSheepFemales++;
+                   }
+                   currentSheepPopulation++;
                }
            }
            else if(currentNests < maxNests){
@@ -127,8 +147,10 @@ public class MapGenerator : MonoBehaviour{
         maxTrees = Mathf.RoundToInt(113 * ApplicationControl.maxTrees);
         maxBushes = Mathf.RoundToInt(200 * ApplicationControl.maxBushes);
         maxPlants = Mathf.RoundToInt(800 * ApplicationControl.maxPlants);
-        maxPopulation = (int)ApplicationControl.maxPopulation;
-        maxNests = ApplicationControl.femalePop;
+        maxRabbitPopulation = (int)ApplicationControl.rabbitMaxPopulation;
+        maxSheepPopulation = (int)ApplicationControl.sheepMaxPopulation;
+
+        maxNests = (ApplicationControl.rabbitFemalePop + ApplicationControl.sheepFemalePop) / 2;
         spawning = true;
     }
 
@@ -180,14 +202,14 @@ public class MapGenerator : MonoBehaviour{
     }
     
     private bool GetFreeAnimalPosition(){
-        Vector3 position = new Vector3(prng.Next(-25, 25), 0f, prng.Next(5, 55));
-        Debug.Log("DAMIAN: " + position);
+        Vector3 position = new Vector3(prng.Next(-25, 25), 0.3f, prng.Next(5, 55));
+        Debug.Log("DAMIANY: " + position);
         Collider[] cols = Physics.OverlapSphere(position, 0.5f, groundLayer);
         if(cols.Length > 0){
             Environment tile = cols[0].GetComponent<Environment>();
             if(tile.waterTile) return false;
             else if(!tile.walkable) return false;
-            else if(tile.GetEntity("Rabbit")) return false;
+            else if(tile.GetEntity("Rabbit") || tile.GetEntity("Sheep")) return false;
             else{
                 spawnPosition = position;
                 return true;

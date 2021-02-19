@@ -6,7 +6,7 @@ public class WorldController : MonoBehaviour{
     private float startTime;
 
     //constant value for 60 seconds
-    const float yearLength = 60f;
+    const float yearLength = 10f;
 
     
     private void Start() {

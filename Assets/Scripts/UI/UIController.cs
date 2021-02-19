@@ -7,10 +7,11 @@ public class UIController : MonoBehaviour{
 
     public RectTransform infoPanel;
     public RectTransform loadingScreen;
-
+    public RectTransform escapeMenu;
 
     private Button zoomButton;
-    private bool infoPanelVisible;
+    private Button yesButton, noButton;
+    private bool infoPanelVisible, escapeMenuVisible;
 
     Animal animal;
 
@@ -20,14 +21,27 @@ public class UIController : MonoBehaviour{
         EventHandlerUI.OnLoading += LoadingDone;
 
         zoomButton = infoPanel.Find("ZoomButton").GetComponent<Button>();
+        yesButton = escapeMenu.Find("BtnYes").GetComponent<Button>();
+        noButton = escapeMenu.Find("BtnNo").GetComponent<Button>();
+
+        yesButton.onClick.AddListener(() => Application.Quit());
+        noButton.onClick.AddListener(() => ToggleEscapeMenu());
 
         infoPanelVisible = false;
+        escapeMenuVisible = false;
 
         loadingScreen.gameObject.SetActive(true);
         infoPanel.gameObject.SetActive(infoPanelVisible);
+        escapeMenu.gameObject.SetActive(escapeMenuVisible);
     }
 
     private void Update() {
+
+        if(Input.GetKeyDown(KeyCode.Escape)){
+            ToggleEscapeMenu();
+        }
+
+
         if(infoPanelVisible){            
             UpdateNeeds();
         }
@@ -83,5 +97,10 @@ public class UIController : MonoBehaviour{
     private void ToggleInfoPanel(){
         infoPanelVisible = !infoPanelVisible;
         infoPanel.gameObject.SetActive(infoPanelVisible);
+    }
+
+    private void ToggleEscapeMenu(){
+        escapeMenuVisible = !escapeMenuVisible;
+        escapeMenu.gameObject.SetActive(escapeMenuVisible);
     }
 }

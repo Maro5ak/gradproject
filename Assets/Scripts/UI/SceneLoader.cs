@@ -7,56 +7,84 @@ using UnityEngine.SceneManagement;
 public class SceneLoader : MonoBehaviour{
 
     public Button startButton;
-    public Slider populationSlider;
+    public Slider rabbitPopulationSlider;
+    public Slider sheepPopulationSlider;
     public Slider treeSlider;
     public Slider plantSlider;
     public Slider bushSlider;
-    public Slider genderSlider;
+    public Slider rabbitGenderSlider;
+    public Slider sheepGenderSlider;
 
-    public Text populationText;
+    public Text rabbitPopulationText, sheepPopulationText;
     public Text treeDensityText;
     public Text bushDensityText;
     public Text plantDensityText;
-    public Text malePerc, femalePerc;
+    public Text rabbitMalePerc, rabbitFemalePerc, sheepMalePerc, sheepFemalePerc;
 
-    private int male, female;
+    private int rabbitMale, rabbitFemale, sheepMale, sheepFemale;
 
 
     void Start(){
+        //button and entities
         startButton.onClick.AddListener(delegate {SimulationStart(); });
-        populationSlider.onValueChanged.AddListener(delegate { UpdatePopulation(); });
         treeSlider.onValueChanged.AddListener(delegate { UpdateTreeDensity(); });
         plantSlider.onValueChanged.AddListener(delegate { UpdatePlantDensity(); });
         bushSlider.onValueChanged.AddListener(delegate { UpdateBushDensity(); });
-        genderSlider.onValueChanged.AddListener(delegate { UpdateGenderPercentages(); });
+        //Species
+        rabbitGenderSlider.onValueChanged.AddListener(delegate { UpdateRabbitGenderPercentages(); });
+        rabbitPopulationSlider.onValueChanged.AddListener(delegate { UpdateRabbitPopulation(); });
+        sheepGenderSlider.onValueChanged.AddListener(delegate { UpdateSheepGenderPercentages(); });
+        sheepPopulationSlider.onValueChanged.AddListener(delegate { UpdateSheepPopulation(); });
 
-        populationText.text = populationSlider.value + "";
+        //entities
         plantDensityText.text = plantSlider.value * 100 + "%";
         bushDensityText.text = bushSlider.value * 100 + "%";
         treeDensityText.text = treeSlider.value * 100+ "%";
-        male = Mathf.RoundToInt(genderSlider.value * 100);
-        female = 100 - male;
-        malePerc.text = male + "%";
-        femalePerc.text = female + "%";
+        //species
+        rabbitPopulationText.text = rabbitPopulationSlider.value + "";
+        sheepPopulationText.text = sheepPopulationSlider.value + "";
+        //rabbit calculations
+        rabbitMale = Mathf.RoundToInt(rabbitGenderSlider.value * 100);
+        rabbitFemale = 100 - rabbitMale;
+        rabbitMalePerc.text = rabbitMale + "%";
+        rabbitFemalePerc.text = rabbitFemale + "%";
+        //sheep calculations
+        sheepMale = Mathf.RoundToInt(sheepGenderSlider.value * 100);
+        sheepFemale = 100 - sheepMale;
+        sheepMalePerc.text = sheepMale + "%";
+        sheepFemalePerc.text = sheepFemale + "%";
     }
 
     private void SimulationStart(){
         
-        ApplicationControl.maxPopulation = populationSlider.value;
+        
         ApplicationControl.maxTrees = treeSlider.value;
         ApplicationControl.maxBushes = bushSlider.value;
         ApplicationControl.maxPlants = plantSlider.value;
-        male = Mathf.RoundToInt(genderSlider.value * populationSlider.value);
-        female = Mathf.RoundToInt(populationSlider.value - male);
-        ApplicationControl.malePop = male;
-        ApplicationControl.femalePop = female;
+        //calcs for rabbit (again)
+        rabbitMale = Mathf.RoundToInt(rabbitGenderSlider.value * rabbitPopulationSlider.value);
+        rabbitFemale = Mathf.RoundToInt(rabbitPopulationSlider.value - rabbitMale);
+        ApplicationControl.rabbitMalePop = rabbitMale;
+        ApplicationControl.rabbitFemalePop = rabbitFemale;
+        ApplicationControl.rabbitMaxPopulation = rabbitPopulationSlider.value;
+        //calcs for sheeps, again ,_,
+        sheepMale = Mathf.RoundToInt(sheepGenderSlider.value * sheepPopulationSlider.value);
+        sheepFemale = Mathf.RoundToInt(sheepPopulationSlider.value - sheepMale);
+        ApplicationControl.sheepMalePop = sheepMale;
+        ApplicationControl.sheepFemalePop = sheepFemale;
+        ApplicationControl.sheepMaxPopulation = sheepPopulationSlider.value;
+
         ApplicationControl.sceneSwitch = true;      
+        //aaand go (that what the button does, you know)
         SceneManager.LoadScene("SampleScene");
         
     }
 
-    private void UpdatePopulation(){
-        populationText.text = populationSlider.value + "";
+    private void UpdateRabbitPopulation(){
+        rabbitPopulationText.text = rabbitPopulationSlider.value + "";
+    }
+    private void UpdateSheepPopulation(){
+        sheepPopulationText.text = sheepPopulationSlider.value + "";
     }
 
     private void UpdateTreeDensity(){
@@ -70,11 +98,17 @@ public class SceneLoader : MonoBehaviour{
     private void UpdateBushDensity(){
         bushDensityText.text = Mathf.RoundToInt(bushSlider.value * 100) + "%";
     }
-    private void UpdateGenderPercentages(){
-        male = Mathf.RoundToInt(genderSlider.value * 100);
-        female = 100 - male;
-        malePerc.text = male + "%";
-        femalePerc.text = female + "%";
+    private void UpdateRabbitGenderPercentages(){
+        rabbitMale = Mathf.RoundToInt(rabbitGenderSlider.value * 100);
+        rabbitFemale = 100 - rabbitMale;
+        rabbitMalePerc.text = rabbitMale + "%";
+        rabbitFemalePerc.text = rabbitFemale + "%";
+    }
+    private void UpdateSheepGenderPercentages(){
+        sheepMale = Mathf.RoundToInt(sheepGenderSlider.value * 100);
+        sheepFemale = 100 - sheepMale;
+        sheepMalePerc.text = sheepMale + "%";
+        sheepFemalePerc.text = sheepFemale + "%";
     }
 
 

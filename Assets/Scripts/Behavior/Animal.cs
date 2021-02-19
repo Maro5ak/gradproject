@@ -7,7 +7,7 @@ public class Animal : LivingEntity{
 
     public LayerMask groundMask;
     
-    private const float betweenActionCooldown = 2.5f;
+    private float betweenActionCooldown = 2.5f;
     private const float distance = 1f;
     private const int maxTries = 5;
 
@@ -104,11 +104,18 @@ public class Animal : LivingEntity{
 
         if(!male && pregnant){
             //GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            Transform baby = Instantiate(Resources.Load<Transform>("Assets/AnimalRabbit"));
-            baby.transform.position = nestTransform.position;
-            if(Random.Range(0, 2) == 1) baby.GetComponent<Rabbit>().SetGender(true);
-            else baby.GetComponent<Rabbit>().SetGender(false);
+            string currentOwner = nestTransform.GetComponent<Nest>().GetOwner().GetComponent<Animal>().GetName();
+            switch(currentOwner){
+                case "Rabbit":
+                    Transform baby = Instantiate(Resources.Load<Transform>("Assets/AnimalRabbit"));
+                    baby.transform.position = nestTransform.position;
+                    if(Random.Range(0, 2) == 1) baby.GetComponent<Rabbit>().SetGender(true);
+                    else baby.GetComponent<Rabbit>().SetGender(false);
+                    break;
+            }
             pregnant = false;
+            
+            
             //lastChild = Time.time;
 
         }
@@ -126,6 +133,7 @@ public class Animal : LivingEntity{
             HandleInteraction();    
             float timeSinceLastAction = Time.time - lastAction;
             if(timeSinceLastAction > betweenActionCooldown && (currentAction != Action.Eating && currentAction != Action.Drinking && currentAction != Action.Nesting)){
+                betweenActionCooldown = Random.Range(2f, 2.6f);
                 ChooseNextAction();
             }
         }
@@ -249,7 +257,7 @@ public class Animal : LivingEntity{
                     
                     //if the gender is male, and nest is full.
                     //if female, get outta there
-                    if(male){
+                    if(male && nestTransform.GetComponent<Nest>().GetOwner().GetComponent<Animal>().GetName() == this.transform.GetComponent<Animal>().GetName()){
                         currentAction = Action.LookingForNest;
                         StartMove();
                         
@@ -412,10 +420,10 @@ public class Animal : LivingEntity{
     }
 
     // debug 
-    private void OnDrawGizmos() {
+    /*private void OnDrawGizmos() {
         Handles.Label(transform.position, currentAction.ToString());
         Gizmos.DrawSphere(target, 0.5f);
-    }
+    }*/
 
     public virtual bool GetGender(){
         return male;

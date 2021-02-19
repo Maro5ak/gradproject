@@ -5,7 +5,6 @@ using UnityEngine;
 public class Nest : LivingEntity, IEnvironment{
     public LayerMask groundLayerMask;
     private Transform tile;
-    private bool nestFull;
     private Transform owner;
 
     public override string GetName(){
@@ -14,7 +13,6 @@ public class Nest : LivingEntity, IEnvironment{
 
     private void Start() {
         owner = null;
-        nestFull = false;
         AddToTile();
     }
 
