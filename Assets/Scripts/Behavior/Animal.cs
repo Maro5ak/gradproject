@@ -75,18 +75,35 @@ public class Animal : LivingEntity{
         }
         Debug.Log(dna);
         switch(dna){
+            //Rabbit genes
+
             case "AB":
-                liveSpan = 9;
+                liveSpan = 5;
                 break;
             case "BA":
-                liveSpan = 8;
+                liveSpan = 4;
                 break;
             case "AA":
-                liveSpan = 6;
+                liveSpan = 3;
                 break;
             case "BB":
-                liveSpan = 10;
+                liveSpan = 6;
                 break;
+
+            //Sheep Genes
+            case "CD":
+                liveSpan = 6;
+                break;
+            case "DC":
+                liveSpan = 5;
+                break;
+            case "CC":
+                liveSpan = 7;
+                break;
+            case "DD":
+                liveSpan = 8;
+                break;
+
         }
     
     }
@@ -95,8 +112,15 @@ public class Animal : LivingEntity{
     
     
     protected void Update() {
-        thirst -= Time.deltaTime * 0.05f;
-        hunger -= Time.deltaTime * 0.015f;
+        thirst -= Time.deltaTime * 0.2f;
+        hunger -= Time.deltaTime * 0.095f;
+        if(thirst < 0f){
+            Die(CauseOfDeath.Thirst);
+        }
+
+        if(hunger < 0f){
+            Die(CauseOfDeath.Hunger);
+        }
 
         if(age > liveSpan){
             Die(CauseOfDeath.OldAge);
@@ -105,12 +129,19 @@ public class Animal : LivingEntity{
         if(!male && pregnant){
             //GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
             string currentOwner = nestTransform.GetComponent<Nest>().GetOwner().GetComponent<Animal>().GetName();
+            Transform baby;
             switch(currentOwner){
                 case "Rabbit":
-                    Transform baby = Instantiate(Resources.Load<Transform>("Assets/AnimalRabbit"));
+                    baby = Instantiate(Resources.Load<Transform>("Assets/AnimalRabbit"));
                     baby.transform.position = nestTransform.position;
                     if(Random.Range(0, 2) == 1) baby.GetComponent<Rabbit>().SetGender(true);
                     else baby.GetComponent<Rabbit>().SetGender(false);
+                    break;
+                case "Sheep":
+                    baby = Instantiate(Resources.Load<Transform>("Assets/AnimalSheep"));
+                    baby.transform.position = nestTransform.position;
+                    if(Random.Range(0, 2) == 1) baby.GetComponent<Sheep>().SetGender(true);
+                    else baby.GetComponent<Sheep>().SetGender(false);
                     break;
             }
             pregnant = false;
@@ -144,16 +175,16 @@ public class Animal : LivingEntity{
 
         lastAction = Time.time;
         if(hunger >= 8f && thirst >= 8f && !pregnant && canMate){
-            if(age >= 1 && age <= 5){
+            if(age >= 1 && age <= 3){
                 numOfTries = 0;
                 LookForNest();
             }
         }
-        else if(thirst < 3f && !recentlyDrank && currentAction != Action.Drinking && currentAction != Action.LookingForFood){
+        else if(thirst < 4f && !recentlyDrank && currentAction != Action.Drinking && currentAction != Action.LookingForFood){
             numOfTries = 0;
             LookForWater();
         }
-        else if(hunger < 4.5f && !recentlyAte && currentAction != Action.Eating && currentAction != Action.LookingForWater){
+        else if(hunger < 2f && !recentlyAte && currentAction != Action.Eating && currentAction != Action.LookingForWater){
             numOfTries = 0;
             
             LookForFood();

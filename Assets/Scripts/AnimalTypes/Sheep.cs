@@ -8,10 +8,10 @@ public class Sheep : Animal{
         for(int i = 0; i < 2; i++){
             switch(Random.Range(0, 2)){
                 case 0: 
-                    genes.Add("A");
+                    genes.Add("C");
                     break;
                 case 1:
-                    genes.Add("B");
+                    genes.Add("D");
                     break;
             }
         }        
